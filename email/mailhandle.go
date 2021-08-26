@@ -7,8 +7,6 @@ import (
 	os    "os"
 
 	gomail "gopkg.in/gomail.v2"
-	kfutil "github.com/KpnmServer/kpnm_web/src/util/file"
-	json "github.com/KpnmServer/kpnm_web/src/util/json"
 )
 
 
