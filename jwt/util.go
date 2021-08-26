@@ -36,7 +36,7 @@ func encodeB64Url(bytes []byte)(b64 string){
 }
 
 func decodeB64Url(b64 string)(bytes []byte, err error){
-	return base64.URLEncoding.DecodeString(Base64AddTail(b64))
+	return base64.URLEncoding.DecodeString(b64AddTail(b64))
 }
 
 func b64RmTail(b64_ string)(b64 string){

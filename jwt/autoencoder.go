@@ -10,7 +10,7 @@ type auto_encoder struct{
 
 func NewAutoEncoder(interval int64, keylen int, outtime_ ...int64)(*auto_encoder){
 	return &auto_encoder{
-		default_encoder: NewEncoder(makeCRandBytes(keylen), outtime_...),
+		default_encoder: *NewEncoder(makeCRandBytes(keylen), outtime_...),
 		change_interval: interval,
 		key_length: keylen,
 	}

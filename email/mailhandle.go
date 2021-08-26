@@ -2,9 +2,7 @@
 package kpnmmail
 
 import (
-	bufio "bufio"
 	tls   "crypto/tls"
-	os    "os"
 
 	gomail "gopkg.in/gomail.v2"
 )

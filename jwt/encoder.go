@@ -59,7 +59,7 @@ func (cdr *default_encoder)Encode(json Json)(token string){
 		return ""
 	}
 	head := b64RmTail(encodeB64Url(([]byte)(`{"alg":"HS256","typ":"JWT"}`)))
-	fdata := head + "." + b64RmTail(encodeB64Url(([]byte)(encodeJson(json))))
+	fdata := head + "." + b64RmTail(encodeB64Url(ujson.EncodeJson(json)))
 	code := b64RmTail(encodeB64Url(hmacSha256(([]byte)(fdata), cdr.key)))
 	token += fdata + "." + code
 	return token
@@ -79,13 +79,13 @@ func (cdr *default_encoder)Decode(token string)(json Json, isout bool, err error
 	if len(arr) != 3 {
 		return nil, false, SPLIT_ERROR
 	}
-	mac1 := hmacSha256(strToBytes(token)[0:len(arr[0]) + 1 + len(arr[1])], cdr.key)
+	mac1 := hmacSha256(([]byte)(token)[0:len(arr[0]) + 1 + len(arr[1])], cdr.key)
 	mac2, _ := decodeB64Url(arr[2])
 	if !equalMac(mac1, mac2) {
 		if cdr.lastkey == nil {
 		}else if cdr.last_change_time + cdr.outtime < timeNowUnix(){
 			cdr.lastkey = nil
-		}else if !equalMac(hmacSha256(strToBytes(token)[0:len(arr[0]) + 1 + len(arr[1])], cdr.lastkey), mac2) {
+		}else if !equalMac(hmacSha256(([]byte)(token)[0:len(arr[0]) + 1 + len(arr[1])], cdr.lastkey), mac2) {
 		}else{
 			isout = true
 		}
@@ -96,11 +96,14 @@ func (cdr *default_encoder)Decode(token string)(json Json, isout bool, err error
 	var data []byte
 	data, err = decodeB64Url(arr[1])
 	if err != nil {
-		return nil, false, err
+		return nil, isout, err
 	}
-	json = decodeJson(bytesToStr(data))
+	err = ujson.DecodeJson(data, &json)
+	if err != nil {
+		return nil, isout, err
+	}
 	if outdate0, ok := json["iat"]; ok && outdate0 != nil && (int64)(outdate0.(float64)) <= timeNowUnix() {
-		return json, false, TOKEN_OUT_DATE_ERROR
+		return json, isout, TOKEN_OUT_DATE_ERROR
 	}
 	return json, isout, nil
 }

@@ -2,7 +2,9 @@
 package kpnmmail
 
 import (
-	os "os"
+	ioutil "io/ioutil"
+
+	ufile "github.com/KpnmServer/go-util/file"
 )
 
 var TEMPLATE_PATH = "emails"
@@ -10,7 +12,7 @@ var TEMPLATE_PATH = "emails"
 func init(){
 	{ // load mail template files
 		var templateFiles []string = make([]string, 0)
-		basePath := util.GetAbsPath(TEMPLATE_PATH)
+		basePath := ufile.GetAbsPath(TEMPLATE_PATH)
 		var findFunc func(path string)
 		findFunc = func(path string){
 			finfos, err := ioutil.ReadDir(path)
@@ -18,7 +20,7 @@ func init(){
 				panic(err)
 			}
 			for _, info := range finfos {
-				fpath := util.JoinPath(path, info.Name())
+				fpath := ufile.JoinPath(path, info.Name())
 				if info.IsDir() {
 					findFunc(fpath)
 				}else{
