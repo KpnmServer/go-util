@@ -1,5 +1,5 @@
 
-package kweb_util_json
+package json_util
 
 import (
 	io "io"

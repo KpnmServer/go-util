@@ -2,11 +2,12 @@
 package jwtutil
 
 import (
-	util "github.com/zyxgad/go-util/util"
+	errors "errors"
 )
 
 var (
-	SPLIT_ERROR = util.NewErr("JWT string split error", nil)
-	MAC_NOT_SAME_ERROR = util.NewErr("The mac isn't right", nil)
-	TOKEN_OUT_DATE_ERROR = util.NewErr("JWT is outdate", nil)
+	NULL_POINT_ERR = errors.New("Null point error")
+	SPLIT_ERROR = errors.New("JWT string split error")
+	MAC_NOT_SAME_ERROR = errors.New("The mac isn't right")
+	TOKEN_OUT_DATE_ERROR = errors.New("JWT is outdate")
 )

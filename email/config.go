@@ -5,6 +5,8 @@ import (
 	os "os"
 )
 
+var TEMPLATE_PATH = "emails"
+
 func init(){
 	{ // load mail template files
 		var templateFiles []string = make([]string, 0)
