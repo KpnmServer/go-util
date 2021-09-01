@@ -21,7 +21,9 @@ func SetOutdate(json Json, outtime time.Duration)(Json){
 type Encoder interface{
 	ChangeKey(key []byte)
 	Encode(json Json)(token string)
-	Decode(token string)(json Json, isout bool, err error)
+	Decode(token string)(json Json, err error)
+	getkey() []byte
+	lastChangeTime() int64
 }
 
 type default_encoder struct{
@@ -65,45 +67,49 @@ func (cdr *default_encoder)Encode(json Json)(token string){
 	return token
 }
 
-func (cdr *default_encoder)Decode(token string)(json Json, isout bool, err error){
-	isout = false
-
+func (cdr *default_encoder)Decode(token string)(json Json, err error){
 	if cdr.lastkey != nil && cdr.last_change_time + 60 * 60 * 24 * 7 < timeNowUnix() {
 		cdr.lastkey = nil
 	}
 
 	if cdr == nil || cdr.key == nil {
-		return nil, false, NULL_POINT_ERR
+		return nil, NULL_POINT_ERR
 	}
 	arr := strings.Split(token, ".")
 	if len(arr) != 3 {
-		return nil, false, SPLIT_ERROR
+		return nil, SPLIT_ERROR
 	}
 	mac1 := hmacSha256(([]byte)(token)[0:len(arr[0]) + 1 + len(arr[1])], cdr.key)
 	mac2, _ := decodeB64Url(arr[2])
 	if !equalMac(mac1, mac2) {
 		if cdr.lastkey == nil {
+			return nil, MAC_NOT_SAME_ERROR
 		}else if cdr.last_change_time + cdr.outtime < timeNowUnix(){
 			cdr.lastkey = nil
+			return nil, MAC_NOT_SAME_ERROR
 		}else if !equalMac(hmacSha256(([]byte)(token)[0:len(arr[0]) + 1 + len(arr[1])], cdr.lastkey), mac2) {
-		}else{
-			isout = true
-		}
-		if !isout {
-			return nil, false, MAC_NOT_SAME_ERROR
+			return nil, MAC_NOT_SAME_ERROR
 		}
 	}
 	var data []byte
 	data, err = decodeB64Url(arr[1])
 	if err != nil {
-		return nil, isout, err
+		return nil, err
 	}
 	err = ujson.DecodeJson(data, &json)
 	if err != nil {
-		return nil, isout, err
+		return nil, err
 	}
 	if outdate0, ok := json["iat"]; ok && outdate0 != nil && (int64)(outdate0.(float64)) <= timeNowUnix() {
-		return json, isout, TOKEN_OUT_DATE_ERROR
+		return json, TOKEN_OUT_DATE_ERROR
 	}
-	return json, isout, nil
+	return json, nil
+}
+
+func (cdr *default_encoder)getkey()([]byte){
+	return cdr.key
+}
+
+func (cdr *default_encoder)lastChangeTime()(int64){
+	return cdr.last_change_time
 }

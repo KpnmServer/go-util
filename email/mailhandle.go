@@ -13,15 +13,29 @@ type Email struct{
 	port int
 	address string
 	password string
+	dialer *gomail.Dialer
+	sender gomail.SendCloser
 }
 
 func NewEmail(host string, port int, address string, password string)(mail *Email){
-	mail = new(Email)
-	mail.host = host
-	mail.port = port
-	mail.address = address
-	mail.password = password
-	return mail
+	mail = &Email{
+		host: host,
+		port: port,
+		address: address,
+		password: password,
+		dialer: gomail.NewDialer(host, port, address, password),
+	}
+	mail.dialer.TLSConfig = &tls.Config{ InsecureSkipVerify: true }
+	return
+}
+
+func (mail *Email)Login()(err error){
+	mail.sender, err = mail.dialer.Dial()
+	return
+}
+
+func (mail *Email)Close()(error){
+	return mail.sender.Close()
 }
 
 func (mail *Email)SendMail(to string, title string, text string)(err error){
@@ -30,11 +44,9 @@ func (mail *Email)SendMail(to string, title string, text string)(err error){
 	msg.SetHeader("To", to)
 	msg.SetHeader("Subject", title)
 	msg.SetBody("text/html", text)
-	dial := gomail.NewDialer(mail.host, mail.port, mail.address, mail.password)
-	dial.TLSConfig = &tls.Config{ InsecureSkipVerify: true }
-	err = dial.DialAndSend(msg)
+	err = mail.sender.Send(mail.address, []string{to}, msg)
 	if err != nil {
-		return err
+		return
 	}
 	return nil
 }

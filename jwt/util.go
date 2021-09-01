@@ -11,11 +11,11 @@ import (
 
 
 func timeNow()(time.Time){
-	return time.Now().UTC()
+	return time.Now()
 }
 
 func timeNowUnix()(int64){
-	return time.Now().UTC().Unix()
+	return time.Now().Unix()
 }
 
 func hmacSha256(data []byte, key []byte)(code []byte){
@@ -29,6 +29,18 @@ func equalMac(mac1, mac2 []byte)(bool){
 		return false
 	}
 	return hmac.Equal(mac1, mac2)
+}
+
+func encodeB64(bytes []byte)(b64 []byte){
+	b64 = make([]byte, base64.StdEncoding.EncodedLen(len(bytes)))
+	base64.StdEncoding.Encode(b64, bytes)
+	return
+}
+
+func decodeB64(b64 []byte)(bytes []byte, err error){
+	bytes = make([]byte, base64.StdEncoding.DecodedLen(len(b64)))
+	n, err := base64.StdEncoding.Decode(bytes, b64)
+	return bytes[:n], err
 }
 
 func encodeB64Url(bytes []byte)(b64 string){
