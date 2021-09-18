@@ -1,8 +1,35 @@
 
 package json_util
 
+import (
+	io "io"
+)
 
 type JsonArr []interface{}
+
+func DecodeJsonArr(data []byte)(arr JsonArr, err error){
+	arr = make(JsonArr, 0)
+	err = DecodeJson(data, &arr)
+	if err != nil {
+		return nil, err
+	}
+	return arr, nil
+}
+
+func DecodeJsonArrStr(data string)(arr JsonArr, err error){
+	arr = make(JsonArr, 0)
+	err = DecodeJsonStr(data, &arr)
+	if err != nil {
+		return nil, err
+	}
+	return arr, nil
+}
+
+func ReadJsonArr(r io.Reader)(arr JsonArr, err error){
+	arr = make(JsonArr, 0)
+	err = ReadJson(r, &arr)
+	return
+}
 
 func (arr JsonArr)Get(ind int)(v interface{}){
 	return arr[ind]
@@ -115,4 +142,13 @@ func (arr JsonArr)GetObj(ind int)(v JsonObj){
 func (arr JsonArr)GetStringMap(ind int)(v map[string]string){
 	return arr[ind].(map[string]string)
 }
+
+func (obj JsonArr)Bytes()([]byte){
+	return EncodeJson(obj)
+}
+
+func (obj JsonArr)String()(string){
+	return EncodeJsonStr(obj)
+}
+
 

@@ -20,7 +20,12 @@ func LoadHtmlFiles(paths ...string)(err error){
 	return err
 }
 
-func ExeHtmlTemp(path string, value interface{})(text string, err error){
+func ExeHtmlTemp(path string, _value... interface{})(text string, err error){
+	var value interface{} = nil
+	if len(_value) > 0 {
+		value = _value[0]
+	}
+
 	buf := bytes.NewBuffer([]byte{})
 	err = htmltp.ExecuteTemplate(buf, path, value)
 	if err != nil {

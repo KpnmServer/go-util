@@ -40,11 +40,11 @@ func ReadJson(r io.Reader, obj_p interface{})(err error){
 	return DecodeJson(data, obj_p)
 }
 
-func WriteJson(w io.Writer, obj interface{})(err error){
+func WriteJson(w io.Writer, obj interface{})(n int, err error){
 	data := EncodeJson(obj)
-	if data != nil {
-		return errors.New("Encode Error")
+	if data == nil {
+		return 0, errors.New("Encode Error")
 	}
-	return nil
+	return w.Write(data)
 }
 

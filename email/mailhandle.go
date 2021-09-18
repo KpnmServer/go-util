@@ -38,21 +38,21 @@ func (mail *Email)Close()(error){
 	return mail.sender.Close()
 }
 
-func (mail *Email)SendMail(to string, title string, text string)(err error){
+func (mail *Email)SendMail(to []string, title string, text string)(err error){
 	msg := gomail.NewMessage()
 	msg.SetHeader("From", mail.address)
-	msg.SetHeader("To", to)
+	msg.SetHeader("To", to...)
 	msg.SetHeader("Subject", title)
 	msg.SetBody("text/html", text)
-	err = mail.sender.Send(mail.address, []string{to}, msg)
+	err = mail.sender.Send(mail.address, to, msg)
 	if err != nil {
 		return
 	}
 	return nil
 }
 
-func (mail *Email)SendHtml(to string, title string, path string, value interface{})(err error){
-	text, err := ExeHtmlTemp(path, value)
+func (mail *Email)SendHtml(to []string, title string, path string, _value ...interface{})(err error){
+	text, err := ExeHtmlTemp(path, _value...)
 	if err != nil {
 		return err
 	}
